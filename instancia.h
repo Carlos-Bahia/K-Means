@@ -29,8 +29,9 @@ class Instancia {
     void imprimirAtributos() const;
 
     // Manipulação de Arquivos
-    static void lerIris();
-    static void lerMFeat();
+    static vector<Instancia> lerIris();
+    static vector<Instancia> lerMFeat();
+    static void escreverInstancias(const vector<Instancia>& instancias, const string& nome_arquivo);
 };
 
 #endif
