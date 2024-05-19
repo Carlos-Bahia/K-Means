@@ -3,6 +3,7 @@
 
 #include "instancia.h"
 #include <vector>
+#include <chrono>
 
 class Centroide{
     private:
@@ -24,6 +25,7 @@ class Centroide{
     void setId(int id);
     void setAtributos(const vector<double>& atributos);
     void setProximos(const vector<Instancia>& proximos);
+    void limparInstanciasProximas();
     void adicionarInstancia(const Instancia& instancia);
 
     // Função para criar centroide aleatorio
@@ -32,6 +34,8 @@ class Centroide{
     //Função para escrever arquivo com os centroides
     static void escreverCentroide(const vector<Centroide>& centroides, const string& nome_arquivo);
     static void escreverCentroidesComInstancias(const vector<Centroide>& centroides, const string& nome_arquivo);
+    static void escreverCentroidesComInstancias(const vector<Centroide>& centroides, const string& nome_arquivo, const vector<chrono::milliseconds>& durations);
+
 };
 
 #endif

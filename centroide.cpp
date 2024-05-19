@@ -127,7 +127,7 @@ void Centroide::adicionarInstancia(const Instancia& instancia){
 }
 
 void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroides, const string& nome_arquivo) {
-    string pasta = "OutputTeste";
+    string pasta = "Output";
     fs::path directory = pasta;
 
     // Cria a pasta se ela não existir
@@ -157,4 +157,48 @@ void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroi
     }
 
     arquivo.close();
+}
+
+void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroides, const string& nome_arquivo, const vector<chrono::milliseconds>& durations) {
+    string pasta = "Output";
+    fs::path directory = pasta;
+
+    // Cria a pasta se ela não existir
+    if (!fs::exists(directory)) {
+        if (!fs::create_directories(directory)) {
+            cerr << "Erro ao criar a pasta: " << directory << endl;
+            return;
+        }
+    }
+
+    fs::path caminho_arquivo = directory / nome_arquivo;
+
+    ofstream arquivo(caminho_arquivo);
+
+    if (!arquivo.is_open()) {
+        cerr << "Erro ao abrir o arquivo para escrita: " << caminho_arquivo << endl;
+        return;
+    }
+
+    arquivo << "K-Means Executado" << endl;
+    arquivo << "Informações Importantes: " << endl;
+    arquivo << "Tempo total de Execução: " << durations[0].count() << " milissegundos." << endl;
+    arquivo << "Tempo total para Instanciação: " << durations[1].count() << " milissegundos." << endl;
+    arquivo << "Tempo total para Clusterização: " << durations[2].count() << " milissegundos." << endl << endl;
+
+
+    for (const Centroide& centroide : centroides) {
+        arquivo << "Centroide ID: " << centroide.getId() << endl;
+        arquivo << "Instancias: ";
+        for (const Instancia& instancia : centroide.getProximos()) {
+            arquivo << instancia.getId() << " ";
+        }
+        arquivo << endl;
+    }
+
+    arquivo.close();
+}
+
+void Centroide::limparInstanciasProximas(){
+    this->instancias_proximas.clear();
 }

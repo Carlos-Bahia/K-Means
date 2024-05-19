@@ -9,6 +9,12 @@ using namespace std;
 
 int main() {
 
+    kmeans(2,10);
+
+    /*
+    Testes:
+
+
     auto start = chrono::high_resolution_clock::now();
 
     vector<Instancia> instanciasIris = Instancia::lerIris();
@@ -30,20 +36,32 @@ int main() {
 
     start = chrono::high_resolution_clock::now();
 
+    atualizarCentroides(centroidesIris);
+    atualizarCentroides(centroidesMfeat);
+
+    end = chrono::high_resolution_clock::now();
+
+    auto durationAtualizacao = chrono::duration_cast<chrono::milliseconds>(end-start);
+
+    start = chrono::high_resolution_clock::now();
+
     Instancia::escreverInstancias(instanciasIris, "instancias_iris.txt");
     Instancia::escreverInstancias(instanciasMFeat, "instancias_mfeat.txt");
     Centroide::escreverCentroide(centroidesIris, "centroides_iris.txt");
     Centroide::escreverCentroide(centroidesMfeat, "centroides_mfeat.txt");
-    Centroide::escreverCentroidesComInstancias(centroidesIris, "centroides_iris_instancias.txt");
-    Centroide::escreverCentroidesComInstancias(centroidesMfeat, "centroides_mfeat_instancias.txt");
+    Centroide::escreverCentroidesComInstancias(centroidesIris, "centroides_iris.txt");
+    Centroide::escreverCentroidesComInstancias(centroidesMfeat, "centroides_mfeat.txt");
 
     end = chrono::high_resolution_clock::now();
     auto durationEscrita = chrono::duration_cast<chrono::milliseconds>(end-start);
 
     cout << "K-Means Finalizado." << endl;
     cout << "Informações importantes:" << endl;
-    cout << "Tempo total de execução: " << duration.count() << " milissegundos." << endl;
+    cout << "Tempo total de Instanciação: " << duration.count() << " milissegundos." << endl;
     cout << "Tempo total de calculo de Instancias Proximas: " << durationCalculoInicial.count() << " milissegundos." << endl;
+    cout << "Tempo total de Atualização dos centroides: " << durationAtualizacao.count() << " milissegundos." << endl;
     cout << "Tempo total de escrita de arquivos: " << durationEscrita.count() << " milissegundos." << endl;
+    */
+    
     return 0;
 }
