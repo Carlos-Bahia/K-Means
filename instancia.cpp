@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <filesystem>
 
 // Construtores
 Instancia::Instancia(int id, vector<double> atributos) : id(id), atributos(atributos) {}
@@ -138,10 +139,23 @@ vector<Instancia> Instancia::lerMFeat() {
 }
 
 void Instancia::escreverInstancias(const vector<Instancia>& instancias, const string& nome_arquivo) {
-    ofstream arquivo(nome_arquivo);
+    string pasta = "OutputTeste";
+    filesystem::path directory = pasta;
+
+    // Cria a pasta se ela não existir
+    if (!filesystem::exists(directory)) {
+        if (!filesystem::create_directories(directory)) {
+            cerr << "Erro ao criar a pasta: " << directory << endl;
+            return;
+        }
+    }
+
+    filesystem::path caminho_arquivo = directory / nome_arquivo;
+
+    ofstream arquivo(caminho_arquivo);
 
     if (!arquivo.is_open()) {
-        cerr << "Erro ao abrir o arquivo para escrita: " << nome_arquivo << endl;
+        cerr << "Erro ao abrir o arquivo para escrita: " << caminho_arquivo << endl;
         return;
     }
 
