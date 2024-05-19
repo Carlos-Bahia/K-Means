@@ -5,6 +5,9 @@
 #include <iostream>
 #include <filesystem>
 
+using namespace std;
+namespace fs = std::filesystem;
+
 // Construtores
 Instancia::Instancia(int id, vector<double> atributos) : id(id), atributos(atributos) {}
 
@@ -140,17 +143,17 @@ vector<Instancia> Instancia::lerMFeat() {
 
 void Instancia::escreverInstancias(const vector<Instancia>& instancias, const string& nome_arquivo) {
     string pasta = "OutputTeste";
-    filesystem::path directory = pasta;
+    fs::path directory = pasta;
 
     // Cria a pasta se ela não existir
-    if (!filesystem::exists(directory)) {
-        if (!filesystem::create_directories(directory)) {
+    if (!fs::exists(directory)) {
+        if (!fs::create_directories(directory)) {
             cerr << "Erro ao criar a pasta: " << directory << endl;
             return;
         }
     }
 
-    filesystem::path caminho_arquivo = directory / nome_arquivo;
+    fs::path caminho_arquivo = directory / nome_arquivo;
 
     ofstream arquivo(caminho_arquivo);
 
@@ -160,9 +163,9 @@ void Instancia::escreverInstancias(const vector<Instancia>& instancias, const st
     }
 
     for (const Instancia& instancia : instancias) {
-        arquivo << "Instancia ID: " << instancia.getId() << " - Atributos: ";
+        arquivo << "Instancia: ";
         for (double atributo : instancia.getAtributos()) {
-            arquivo << fixed << atributo << " ";
+            arquivo << fixed << setprecision(2) << atributo << " ";
         }
         arquivo << endl;
     }

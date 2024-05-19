@@ -4,6 +4,9 @@
 #include <fstream>
 #include <filesystem> 
 
+using namespace std;
+namespace fs = std::filesystem;
+
 // Construtor
 Centroide::Centroide(int id, vector<double> atributos, vector<Instancia> instancias_proximas)
     : id(id), atributos(atributos), instancias_proximas(instancias_proximas) {}
@@ -87,19 +90,19 @@ Centroide Centroide::criarCentroideAleatorio(int id, vector<Instancia> instancia
     return centroide;
 }
 
-void Centroide::escreverCentroide(const vector<Centroide>& centroides, const string& nome_arquivo){
+void Centroide::escreverCentroide(const vector<Centroide>& centroides, const string& nome_arquivo) {
     string pasta = "OutputTeste";
-    filesystem::path directory = pasta;
+    fs::path directory = pasta;
 
     // Cria a pasta se ela não existir
-    if (!filesystem::exists(directory)) {
-        if (!filesystem::create_directories(directory)) {
+    if (!fs::exists(directory)) {
+        if (!fs::create_directories(directory)) {
             cerr << "Erro ao criar a pasta: " << directory << endl;
             return;
         }
     }
 
-    filesystem::path caminho_arquivo = directory / nome_arquivo;
+    fs::path caminho_arquivo = directory / nome_arquivo;
 
     ofstream arquivo(caminho_arquivo);
 
@@ -111,7 +114,44 @@ void Centroide::escreverCentroide(const vector<Centroide>& centroides, const str
     for (const Centroide& centroide : centroides) {
         arquivo << "Centroide ID: " << centroide.getId() << " - Atributos: ";
         for (double atributo : centroide.getAtributos()) {
-            arquivo << fixed << atributo << " ";
+            arquivo << fixed << setprecision(2) << atributo << " ";
+        }
+        arquivo << endl;
+    }
+
+    arquivo.close();
+}
+
+void Centroide::adicionarInstancia(const Instancia& instancia){
+    this->instancias_proximas.push_back(move(instancia));
+}
+
+void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroides, const string& nome_arquivo) {
+    string pasta = "OutputTeste";
+    fs::path directory = pasta;
+
+    // Cria a pasta se ela não existir
+    if (!fs::exists(directory)) {
+        if (!fs::create_directories(directory)) {
+            cerr << "Erro ao criar a pasta: " << directory << endl;
+            return;
+        }
+    }
+
+    fs::path caminho_arquivo = directory / nome_arquivo;
+
+    ofstream arquivo(caminho_arquivo);
+
+    if (!arquivo.is_open()) {
+        cerr << "Erro ao abrir o arquivo para escrita: " << caminho_arquivo << endl;
+        return;
+    }
+
+    for (const Centroide& centroide : centroides) {
+        arquivo << "Centroide ID: " << centroide.getId() << endl;
+        arquivo << "Instancias: ";
+        for (const Instancia& instancia : centroide.getProximos()) {
+            arquivo << instancia.getId() << " ";
         }
         arquivo << endl;
     }
