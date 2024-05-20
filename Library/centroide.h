@@ -34,8 +34,10 @@ class Centroide{
     //Função para escrever arquivo com os centroides
     static void escreverCentroide(const vector<Centroide>& centroides, const string& nome_arquivo);
     static void escreverCentroidesComInstancias(const vector<Centroide>& centroides, const string& nome_arquivo);
-    static void escreverCentroidesComInstancias(const vector<Centroide>& centroides, const string& nome_arquivo, const vector<chrono::milliseconds>& durations);
+    static void escreverCentroidesComInstancias(const vector<Centroide>& centroides, const vector<chrono::milliseconds>& durations);
 
 };
+
+string getCurrentDatetime();
 
 #endif

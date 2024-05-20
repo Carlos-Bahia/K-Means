@@ -2,6 +2,7 @@
 #include <vector>
 #include <random>
 #include <fstream>
+#include <chrono>
 #include <filesystem> 
 
 using namespace std;
@@ -159,7 +160,20 @@ void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroi
     arquivo.close();
 }
 
-void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroides, const string& nome_arquivo, const vector<chrono::milliseconds>& durations) {
+string getCurrentDatetime() {
+    // Obter a data e hora atuais
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time);
+
+    // Criar um stream de string para formatar a data e hora
+    std::ostringstream oss;
+    oss << std::put_time(&now_tm, "%Y-%m-%d-%H-%M-%S");
+
+    return oss.str();
+}
+
+void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroides, const vector<chrono::milliseconds>& durations) {
     string pasta = "Output";
     fs::path directory = pasta;
 
@@ -171,7 +185,7 @@ void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroi
         }
     }
 
-    fs::path caminho_arquivo = directory / nome_arquivo;
+    fs::path caminho_arquivo = directory / getCurrentDatetime();
 
     ofstream arquivo(caminho_arquivo);
 

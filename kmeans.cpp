@@ -212,5 +212,5 @@ void kmeans(int baseDeDados, int K){
     durations.push_back(durationInstancias);
     durations.push_back(durationCentroides);
 
-    Centroide::escreverCentroidesComInstancias(centroides, "centroides.txt", durations);
+    Centroide::escreverCentroidesComInstancias(centroides, durations);
 }
