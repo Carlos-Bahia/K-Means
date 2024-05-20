@@ -1,6 +1,6 @@
-#include "instancia.h"
-#include "centroide.h"
-#include "kmeans.h"
+#include "Library/instancia.h"
+#include "Library/centroide.h"
+#include "Library/kmeans.h"
 #include <iostream>
 #include <vector>
 #include <chrono>
