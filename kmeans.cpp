@@ -3,6 +3,7 @@
 #include <future>
 #include <mutex>
 #include <cmath>
+#include <numeric>
 #include <limits>
 #include <vector>
 #include <stdexcept>
@@ -169,6 +170,84 @@ bool verificarConvergencia(const vector<Centroide>& centroides, const vector<Cen
     return true;
 }
 
+Centroide calcularCentroideMaisProximo(vector<Centroide>& centroides, const Instancia& instancia) {
+    int indiceCentroideProximo = -1;
+    double menorDistancia = numeric_limits<double>::max();
+
+    for (size_t i = 0; i < centroides.size(); ++i) {
+        double distancia = calcularDistanciaEuclidiana(instancia.getAtributos(), centroides[i].getAtributos());
+        if (distancia < menorDistancia) {
+            menorDistancia = distancia;
+            indiceCentroideProximo = i;
+        }
+    }
+
+    if (indiceCentroideProximo != -1) {
+        return centroides[indiceCentroideProximo];
+    } else {
+        throw runtime_error("Nenhum centroide encontrado.");
+    }
+}
+
+//Implementando indice da Silhueta
+//silhouette Measure
+
+double silhouetteMeasure(const vector<Centroide>& centroides) {
+    vector<double> silhouettesA;
+
+    for (const Centroide& centroide : centroides) {
+        vector<Instancia> instancias = centroide.getProximos();
+
+        for (size_t i = 0; i < instancias.size(); ++i) {
+            double distanciaTotal = 0.0;
+
+            for (size_t j = 0; j < instancias.size(); ++j) {
+                if (i != j) {
+                    double distanciaTemp = calcularDistanciaEuclidiana(instancias[i].getAtributos(), instancias[j].getAtributos());
+                    distanciaTotal += distanciaTemp;
+                }
+            }
+            silhouettesA.push_back(distanciaTotal / (instancias.size() - 1));
+        }
+    }
+
+    vector<double> silhouettesB;
+
+    for (size_t i = 0; i < centroides.size(); ++i) {
+        vector<Centroide> centroidesTemp;
+
+        for (size_t j = 0; j < centroides.size(); ++j) {
+            if (centroides[j].getAtributos() != centroides[i].getAtributos()) {
+                centroidesTemp.push_back(centroides[j]);
+            }
+        }
+
+        vector<Instancia> instancias = centroides[i].getProximos();
+
+        for (size_t j = 0; j < instancias.size(); ++j) {
+            Centroide centroideProximo = calcularCentroideMaisProximo(centroidesTemp, instancias[j]);
+            vector<Instancia> instanciasProximas = centroideProximo.getProximos();
+            double distanciaTotal = 0.0;
+
+            for (size_t k = 0; k < instanciasProximas.size(); ++k) {
+                double temp = calcularDistanciaEuclidiana(instancias[j].getAtributos(), instanciasProximas[k].getAtributos());
+                distanciaTotal += temp;
+            }
+            silhouettesB.push_back(distanciaTotal / instanciasProximas.size());
+        }
+    }
+
+    vector<double> silhouette;
+
+    for (size_t i = 0; i < silhouettesA.size(); ++i) {
+        double temp = (silhouettesB[i] - silhouettesA[i]) / max(silhouettesA[i], silhouettesB[i]);
+        silhouette.push_back(temp);
+    }
+
+    double media = accumulate(silhouette.begin(), silhouette.end(), 0.0);
+
+    return media / silhouette.size();
+}
 
 void kmeans(int baseDeDados, int K){
 
@@ -212,5 +291,7 @@ void kmeans(int baseDeDados, int K){
     durations.push_back(durationInstancias);
     durations.push_back(durationCentroides);
 
-    Centroide::escreverCentroidesComInstancias(centroides, durations);
+    double silhouette = silhouetteMeasure(centroides);
+
+    Centroide::escreverCentroidesComInstancias(centroides, durations, silhouette);
 }

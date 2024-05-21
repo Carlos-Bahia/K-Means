@@ -3,6 +3,7 @@
 #include <random>
 #include <fstream>
 #include <chrono>
+#include <algorithm>
 #include <filesystem> 
 
 using namespace std;
@@ -173,7 +174,7 @@ string getCurrentDatetime() {
     return oss.str();
 }
 
-void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroides, const vector<chrono::milliseconds>& durations) {
+void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroides, const vector<chrono::milliseconds>& durations, const double& silhouette) {
     string pasta = "Output";
     fs::path directory = pasta;
 
@@ -198,8 +199,8 @@ void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroi
     arquivo << "Informações Importantes: " << endl;
     arquivo << "Tempo total de Execução: " << durations[0].count() << " milissegundos." << endl;
     arquivo << "Tempo total para Instanciação: " << durations[1].count() << " milissegundos." << endl;
-    arquivo << "Tempo total para Clusterização: " << durations[2].count() << " milissegundos." << endl << endl;
-
+    arquivo << "Tempo total para Clusterização: " << durations[2].count() << " milissegundos." << endl;
+    arquivo << "Indice de Silhouette: " << silhouette << endl << endl;
 
     for (const Centroide& centroide : centroides) {
         arquivo << "Centroide ID: " << centroide.getId() << endl;
