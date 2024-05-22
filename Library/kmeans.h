@@ -3,6 +3,7 @@
 
 #include "centroide.h"
 #include <vector>
+#include <map>
 
 vector<Centroide> criarCentroidesAleatorios(int numeroK, vector<Instancia>& instancias);
 double calcularDistanciaEuclidiana(vector<double> vetorInstancia, vector<double> vetorCentroide);
@@ -11,5 +12,10 @@ Centroide calcularCentroideMaisProximo(vector<Centroide>& centroides, const Inst
 void atualizarCentroides(vector<Centroide>& centroides);
 bool verificarConvergencia(const vector<Centroide>& centroides, const vector<Centroide>& centroidesAntigos, double tolerancia);
 void kmeans(int baseDeDados,int K);
+map<int, int> mapearMatrizEsperada(const int baseDados);
+map<int,int> mapearMatrizReal(const vector<Centroide>& centroides, int baseDados);
+void imprimirMap(const map<int, int>& mapa);
+double fmeasure(const vector<Centroide>& centroides, int baseDados);
+
 
 #endif

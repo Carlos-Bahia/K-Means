@@ -2,11 +2,14 @@
 #include <thread>
 #include <future>
 #include <mutex>
+#include <map>
 #include <cmath>
 #include <numeric>
 #include <limits>
 #include <vector>
+#include <set>
 #include <stdexcept>
+#include <algorithm>
 
 vector<Centroide> criarCentroidesAleatorios(int numeroK, vector<Instancia>& instancias){
    vector<Centroide> centroides;
@@ -249,6 +252,42 @@ double silhouetteMeasure(const vector<Centroide>& centroides) {
     return media / silhouette.size();
 }
 
+map<int, int> mapearMatrizEsperada(const int baseDados) {
+    map<int, int> resultado;
+
+    if (baseDados == 1) {
+        for (int i = 0; i < 2000; i++) {
+            resultado[i] = i / 200;
+        }
+    } else if (baseDados == 2) {
+        for (int i = 0; i < 150; i++) {
+            resultado[i] = i / 50;
+        }
+    }
+
+    return resultado;
+}
+
+map<int,int> mapearMatrizReal(const vector<Centroide>& centroides, int baseDados){
+    map<int,int> resultado;
+    int numInteracoes;
+
+    if(baseDados == 1){
+        numInteracoes = 150;
+    } else{
+        numInteracoes = 2000;
+    }
+
+    for(int j = 0; j < centroides.size(); j++){
+        vector<Instancia> instancias = centroides[j].getProximos();
+        for(int i = 0; i < instancias.size(); i++){
+            resultado[instancias[i].getId()] = j;
+        }
+    }
+    
+    return resultado;
+}
+
 void kmeans(int baseDeDados, int K){
 
     auto start = chrono::high_resolution_clock::now();
@@ -292,6 +331,46 @@ void kmeans(int baseDeDados, int K){
     durations.push_back(durationCentroides);
 
     double silhouette = silhouetteMeasure(centroides);
+    double medidaF = fmeasure(centroides, baseDeDados);
 
-    Centroide::escreverCentroidesComInstancias(centroides, durations, silhouette);
+    vector<double> indices;
+    indices.push_back(move(silhouette));
+    indices.push_back(move(medidaF));
+
+    Centroide::escreverCentroidesComInstancias(centroides, durations, indices);
+}
+
+double fmeasure(const vector<Centroide>& centroides, int baseDados){
+    map<int,int> matrizEsperada = mapearMatrizEsperada(baseDados);
+    map<int,int> matrizReal = mapearMatrizReal(centroides, baseDados);
+
+    int TP = 0;
+    int FP = 0;
+    int FN = 0;
+
+    for(const auto& par : matrizEsperada){
+        int id = par.first;
+        int classEsperada = par.second;
+        int classReal = matrizReal[id];
+    
+
+        if(classReal == classEsperada){
+            TP++;
+        } else{
+            FP++;
+            FN++;
+        }
+    }
+
+    double precision = TP / double(TP+FP);
+    double recall = TP / double(TP+FN);
+    double f1 = 2 * (precision * recall) / (precision + recall);
+
+    return f1;
+}
+
+void imprimirMap(const map<int, int>& mapa) {
+    for (const auto& par : mapa) {
+        cout << "Chave: " << par.first << " - Valor: " << par.second << endl;
+    }
 }

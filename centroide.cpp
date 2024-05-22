@@ -174,7 +174,7 @@ string getCurrentDatetime() {
     return oss.str();
 }
 
-void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroides, const vector<chrono::milliseconds>& durations, const double& silhouette) {
+void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroides, const vector<chrono::milliseconds>& durations, const vector<double>& indices) {
     string pasta = "Output";
     fs::path directory = pasta;
 
@@ -200,7 +200,8 @@ void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroi
     arquivo << "Tempo total de Execução: " << durations[0].count() << " milissegundos." << endl;
     arquivo << "Tempo total para Instanciação: " << durations[1].count() << " milissegundos." << endl;
     arquivo << "Tempo total para Clusterização: " << durations[2].count() << " milissegundos." << endl;
-    arquivo << "Indice de Silhouette: " << silhouette << endl << endl;
+    arquivo << "Indice de Silhouette: " << indices[0] << endl;
+    arquivo << "F-Measure: " << indices[1] << endl << endl;
 
     for (const Centroide& centroide : centroides) {
         arquivo << "Centroide ID: " << centroide.getId() << endl;
