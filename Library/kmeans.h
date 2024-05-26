@@ -12,10 +12,16 @@ Centroide calcularCentroideMaisProximo(vector<Centroide>& centroides, const Inst
 void atualizarCentroides(vector<Centroide>& centroides);
 bool verificarConvergencia(const vector<Centroide>& centroides, const vector<Centroide>& centroidesAntigos, double tolerancia);
 void kmeans(int baseDeDados,int K);
-map<int, int> mapearMatrizEsperada(const int baseDados);
+map<int, int> mapearMatrizEsperada(const vector<Centroide>& centroides, int baseDados);
 map<int,int> mapearMatrizReal(const vector<Centroide>& centroides, int baseDados);
 void imprimirMap(const map<int, int>& mapa);
-double fmeasure(const vector<Centroide>& centroides, int baseDados);
-
+double fmeasure(vector<Centroide>& centroides, int baseDados,const vector<Instancia>& instancias);
+double daviesBouldin(const vector<Centroide>& centroides);
+double distanciaIntraClusterDaviesBouldin(Centroide centroide);
+double calinskiHarabasz(vector<Centroide> centroides, vector<Instancia> instancias);
+vector<double> calcularCentroideGlobal(const vector<Instancia>& instancias);
+vector<vector<int>> calcularMatrizDeContingencia(const map<int, int>& esperado, const map<int, int>& real,int baseDados);
+void exibirMatrizDeContingencia(const std::vector<std::vector<int>>& matriz);
+double adjustedRandIndex(const vector<Centroide>& centroides, int baseDados, const vector<Instancia>& instancias);
 
 #endif

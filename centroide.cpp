@@ -201,7 +201,10 @@ void Centroide::escreverCentroidesComInstancias(const vector<Centroide>& centroi
     arquivo << "Tempo total para Instanciação: " << durations[1].count() << " milissegundos." << endl;
     arquivo << "Tempo total para Clusterização: " << durations[2].count() << " milissegundos." << endl;
     arquivo << "Indice de Silhouette: " << indices[0] << endl;
-    arquivo << "F-Measure: " << indices[1] << endl << endl;
+    arquivo << "F-Measure: " << indices[1] << endl;
+    arquivo << "Davies-Boldin: " << indices[2] << endl;
+    arquivo << "Calinski-Harabasz: " << indices[3] << endl;
+    arquivo << "Adjusted Rand Index: " << indices[4] << endl << endl;
 
     for (const Centroide& centroide : centroides) {
         arquivo << "Centroide ID: " << centroide.getId() << endl;

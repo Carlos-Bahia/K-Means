@@ -252,20 +252,56 @@ double silhouetteMeasure(const vector<Centroide>& centroides) {
     return media / silhouette.size();
 }
 
-map<int, int> mapearMatrizEsperada(const int baseDados) {
-    map<int, int> resultado;
+map<int, int> mapearMatrizEsperada(const vector<Centroide>& centroides, int baseDados) {
+    map<int, int> mapaEsperado;
+    int numClasses = 0;
+    int intervalo = 0;
 
+    // Determinar o número de classes e o intervalo com base na base de dados
     if (baseDados == 1) {
-        for (int i = 0; i < 2000; i++) {
-            resultado[i] = i / 200;
-        }
+        numClasses = 3;
+        intervalo = 50;
     } else if (baseDados == 2) {
-        for (int i = 0; i < 150; i++) {
-            resultado[i] = i / 50;
+        numClasses = 10;
+        intervalo = 200;
+    } else {
+        // Handle other cases or throw an error
+    }
+
+    vector<bool> centroideUtilizado(centroides.size(), false);
+
+    for (int classe = 0; classe < numClasses; ++classe) {
+        int inicio = classe * intervalo;
+        int fim = (classe + 1) * intervalo - 1;
+        int maxInstancias = -1;
+        int melhorCentroide = -1;
+        size_t melhorIndice = -1;
+
+        for (size_t i = 0; i < centroides.size(); ++i) {
+            if (!centroideUtilizado[i]) {
+                int contador = 0;
+                for (Instancia instancia : centroides[i].getProximos()) {
+                    if (instancia.getId() >= inicio && instancia.getId() <= fim) {
+                        contador++;
+                    }
+                }
+                if (contador > maxInstancias) {
+                    maxInstancias = contador;
+                    melhorCentroide = centroides[i].getId();
+                    melhorIndice = i;
+                }
+            }
+        }
+
+        if (melhorCentroide != -1) {
+            centroideUtilizado[melhorIndice] = true;
+            for(int j = inicio; j <= fim; j++){
+                mapaEsperado[j] = melhorCentroide;
+            }
         }
     }
 
-    return resultado;
+    return mapaEsperado;
 }
 
 map<int,int> mapearMatrizReal(const vector<Centroide>& centroides, int baseDados){
@@ -331,17 +367,23 @@ void kmeans(int baseDeDados, int K){
     durations.push_back(durationCentroides);
 
     double silhouette = silhouetteMeasure(centroides);
-    double medidaF = fmeasure(centroides, baseDeDados);
+    double medidaF = fmeasure(centroides, baseDeDados, instancias);
+    double davies = daviesBouldin(centroides);
+    double calinski = calinskiHarabasz(centroides, instancias);
+    double ari = adjustedRandIndex(centroides, baseDeDados, instancias);
 
     vector<double> indices;
     indices.push_back(move(silhouette));
     indices.push_back(move(medidaF));
+    indices.push_back(move(davies));
+    indices.push_back(move(calinski));
+    indices.push_back(move(ari));
 
     Centroide::escreverCentroidesComInstancias(centroides, durations, indices);
 }
 
-double fmeasure(const vector<Centroide>& centroides, int baseDados){
-    map<int,int> matrizEsperada = mapearMatrizEsperada(baseDados);
+double fmeasure(vector<Centroide>& centroides, int baseDados,const vector<Instancia>& instancias){
+    map<int,int> matrizEsperada = mapearMatrizEsperada(centroides, baseDados);
     map<int,int> matrizReal = mapearMatrizReal(centroides, baseDados);
 
     int TP = 0;
@@ -369,8 +411,171 @@ double fmeasure(const vector<Centroide>& centroides, int baseDados){
     return f1;
 }
 
+void exibirMatrizDeContingencia(const vector<vector<int>>& matriz) {
+    for (const auto& linha : matriz) {
+        for (int valor : linha) {
+            cout << valor << " ";
+        }
+        cout << endl;
+    }
+}
+
+vector<vector<int>> calcularMatrizDeContingencia(const map<int, int>& esperado, const map<int, int>& real, int baseDados) 
+{
+    int numClusters;
+    if (baseDados == 1) {
+        numClusters = 3;
+    } else if (baseDados == 2) {
+        numClusters = 10;
+    } else {
+        throw invalid_argument("Base de dados inválida. Escolha 1 ou 2.");
+    }
+
+    vector<vector<int>> matrizDeContingencia(numClusters, vector<int>(numClusters, 0));
+
+    for (const auto& par : esperado) {
+        int index = par.first;
+        int verdadeiroCluster = par.second;
+        int preditoCluster = real.at(index);
+        matrizDeContingencia[verdadeiroCluster][preditoCluster]++;
+    }
+
+    return matrizDeContingencia;
+}
+
+double adjustedRandIndex(const vector<Centroide>& centroides, int baseDados, const vector<Instancia>& instancias){
+    map<int, int> mapaEsperado = mapearMatrizEsperada(centroides, baseDados);
+    map<int, int> mapaReal = mapearMatrizReal(centroides, baseDados);
+
+    vector<vector<int>> matrizContingencia = calcularMatrizDeContingencia(mapaEsperado, mapaReal, baseDados);
+    
+    int numInstancias = instancias.size();
+    int numClasses;
+    if(baseDados == 1){
+        numClasses = 3;
+    } else if(baseDados == 2){
+        numClasses = 10;
+    }
+
+    int totalPares = (numInstancias * (numInstancias - 1)) / 2;
+
+    int somaClusterVerdadeiros = 0;
+    for(int i = 0; i < numClasses; i++){
+        int somaClasse = 0;
+        for(int j = 0; j < numClasses; j++){
+            somaClasse += matrizContingencia[i][j];
+        }
+        somaClusterVerdadeiros += (somaClasse * (somaClasse - 1)) / 2;
+    }
+
+    int somaClusterEsperados = 0;
+    for(int j = 0; j < numClasses; j++){
+        int somaClasse = 0;
+        for(int i = 0; i < numClasses; i++){
+            somaClasse += matrizContingencia[i][j];
+        }
+        somaClusterEsperados += (somaClasse * (somaClasse - 1)) / 2;
+    }
+
+    int indiceObservado = 0;
+    for(int i = 0; i < numClasses; i++){
+        for(int j = 0; j < numClasses; j++){
+            if(matrizContingencia[i][j] > 0){
+                indiceObservado += (matrizContingencia[i][j] * (matrizContingencia[i][j] - 1)) / 2;
+            }
+        }
+    }
+
+    double indiceEsperado = (double(somaClusterVerdadeiros) * double(somaClusterEsperados)) / double(totalPares);
+    double indiceMaximo = 0.5 * (somaClusterVerdadeiros + somaClusterEsperados);
+
+    double ari = (indiceObservado - indiceEsperado) / (indiceMaximo - indiceEsperado);
+
+    return ari;
+}
+
 void imprimirMap(const map<int, int>& mapa) {
     for (const auto& par : mapa) {
         cout << "Chave: " << par.first << " - Valor: " << par.second << endl;
     }
+}
+
+double distanciaIntraClusterDaviesBouldin(Centroide centroide){
+    double distancia;
+    vector<Instancia> instancias = centroide.getProximos();
+    for(Instancia instancia : instancias){
+        distancia += calcularDistanciaEuclidiana(instancia.getAtributos(), centroide.getAtributos());
+    }
+
+    return distancia / (instancias.size());
+}
+
+double daviesBouldin(const vector<Centroide>& centroides) {
+    vector<double> intraCluster;
+    map<pair<int, int>, double> R;
+    vector<double> RMax(centroides.size(), 0.0);
+
+    for (const Centroide& centroide : centroides) {
+        intraCluster.push_back(distanciaIntraClusterDaviesBouldin(centroide));
+    }
+
+    for (int i = 0; i < centroides.size(); ++i) {
+        for (int j = 0; j < centroides.size(); ++j) {
+            if (i != j) {
+                double distInterCluster = calcularDistanciaEuclidiana(centroides[i].getAtributos(), centroides[j].getAtributos());
+                R[make_pair(i, j)] = (intraCluster[i] + intraCluster[j]) / distInterCluster;
+            }
+        }
+    }
+
+    for (int i = 0; i < centroides.size(); ++i) {
+        double maxR = -1.0;
+        for (int j = 0; j < centroides.size(); ++j) {
+            if (i != j && R[make_pair(i, j)] > maxR) {
+                maxR = R[make_pair(i, j)];
+            }
+        }
+        RMax[i] = maxR;
+    }
+
+    double daviesBouldinResult = 0.0;
+    for (double r : RMax) {
+        daviesBouldinResult += r;
+    }
+
+    return daviesBouldinResult / centroides.size();
+}
+
+vector<double> calcularCentroideGlobal(const vector<Instancia>& instancias){
+    vector<double> global(instancias[0].getAtributos().size(), 0.0);
+    for(const Instancia instancia : instancias){
+        const vector<double> atributos = instancia.getAtributos();
+        for(int i = 0; i < atributos.size(); i++){
+            global[i] += atributos[i];
+        }
+    }
+    for(double& valor : global){
+        valor = valor / instancias.size();
+    }
+    return global;
+}
+
+double calinskiHarabasz(vector<Centroide> centroides, vector<Instancia> instancias){
+    vector<double> global = calcularCentroideGlobal(instancias);
+
+    double B = 0.0;
+    double W = 0.0;
+
+    for(Centroide cen : centroides){
+        double distanciaCentroide = calcularDistanciaEuclidiana(cen.getAtributos(), global);
+        B += pow(distanciaCentroide,2) * cen.getProximos().size();
+
+        vector<Instancia> insCentroides = cen.getProximos();
+
+        for(Instancia& ins : insCentroides){
+            W += pow(calcularDistanciaEuclidiana(ins.getAtributos(), cen.getAtributos()), 2);
+        }
+    }
+
+    return (B/(centroides.size()-1)) / (W/(instancias.size()-centroides.size()));
 }

@@ -33,3 +33,9 @@ Para executar o programa nas bases de dados já disponíveis. Altere diretamente
 ## Resultados
 
 Uma vez que o programa seja compilado e executado, será criado uma pasta chamada Output, contendo um arquivo .txt com os resultados da execução, incluindo tempos de execuções e informações dos centroides criados.
+
+
+## Indices de Validação
+
+Ao fim da execução do código, 5 indices de validação são executadas e adicionados ao arquivo de resultado.
+Incluindo : Sillhouette, Davies-Bouldin, Calinski-Harabasz, F-measure e Adjusted Rand Index
